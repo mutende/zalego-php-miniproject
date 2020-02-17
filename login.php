@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,13 +32,51 @@
                 </div>
                 <div class="card-body">         
                 <form autocomplete="off" action="files/authentication.php" method="POST">
+                    <?php 
+                        if(isset($_SESSION["Error"]) && $_SESSION["Error"] != null){
+
+                            ?>
+
+                                <div class="mb-2 mt-2">
+                               
+
+                                    <span class="text-sm-center text-danger py-2">
+                                    <?php  
+                                    echo $_SESSION["Error"];
+                                        $_SESSION["Error"] = null;
+                                    ?>
+                                    </span>
+                                </div>
+
+                            <?php
+                        }
+
+                        if(isset($_SESSION["success"]) && $_SESSION["success"] != null){
+
+                            ?>
+
+                                <div class="mb-2 mt-2">
+                               
+
+                                    <span class="text-sm-center text-success py-2">
+                                    <?php  
+                                    echo $_SESSION["success"];
+                                        $_SESSION["success"] = null;
+                                    ?>
+                                    </span>
+                                </div>
+
+                            <?php
+
+                        }
+                    ?>
                     <div class="form-group">
                         <label for="Email">Email</label>
-                        <input type="email" class="form-control" id="Email" name="email" required>
+                        <input type="email" class="form-control" id="Email" name="email">
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <input type="password" class="form-control" id="password" name="password">
                     </div>
                     <div class="form-group mt-3">                      
                         <button type="submit" class="btn btn-primary btn-smfloat-left" name="login" style="width: 110px;">Login</button>

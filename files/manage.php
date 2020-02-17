@@ -1,13 +1,15 @@
 <?php
 include_once('dbconnection.php');
+session_start();
 
-// get students
+
 function getStudents($dbc){
     $query="SELECT * FROM `students` ORDER BY `id` DESC";
-    $result = $dbc->query($query);
-    $rows=$result->num_rows;
+    $result = $dbc->prepare($query);
+    $result->execute();
+    $rows=$result->rowCount();
     if ($rows>0) {
-        while($row = $result->fetch_assoc())
+        while($row = $result->fetchAll())
         {
             $students[]=$row;
         }
@@ -17,44 +19,62 @@ function getStudents($dbc){
     return $students;
     }
 
-// add student
+
 function addStudent($name,$phone,$course, $dbc){
     $add = "INSERT INTO `students` (name, phone, course, date)
-    VALUES ('$name','$phone', '$course', Now())";
-    if($dbc->query($add) === true ){
-        header('location: ../student');
-    }else{
-        echo "Error: " . $add . "<br>" . $dbc->error;
+            VALUES (?,?,?,?)";
+    $stmt = $dbc->prepare($add);
+    try{
+        
+        if($stmt->execute([$name,$phone,$course, date('Y-m-d')])){
+            header('location: ../student');
+
+        }else{
+            $_SESSION["Error"] ="Insertion Failed";
+            header('location: ../student');
+
+        }
+        
+    }catch(ErrorException $e){
+        echo 'Erro'. $e->getMessage();
     }
+    
+
+
 }
 
-//delete student
+
 function deleteStudent($id, $dbc){
-    $delete = "DELETE FROM 	students WHERE id='$id'";
-    if($dbc->query($delete) === true ){
+    $delete = "DELETE FROM 	students WHERE id=?";
+    $pre = $dbc->prepare($delete);    
+    if($pre->execute([$id])){
         header('location: ../student');
-    }else{
-        echo "Error: " . $delete . "<br>" . $dbc->error;
     }
 }
 
 
-// update students
 function updateStudent($id,$name,$phone,$course,$dbc){
-    $update = "UPDATE students SET name='$name',phone='$phone', course='$course' WHERE id='$id'";
-    if($dbc->query($update) === true ){
-        header('location: ../student');
-    }else{
-        echo "Error: " . $update . "<br>" . $dbc->error;
-    }
+    $update = "UPDATE `students` SET `name`=?,`phone`=?, `course`=? WHERE `id`=?";
+    $pre = $dbc->prepare($update);
+    
+    if($pre->execute([$name,$phone,$course,$id])){
 
+        header('location: ../student');
+    }
 }
 
 if(isset($_POST['addstudent'])){
     $name = $_POST['name'];
     $phone = $_POST['phone'];
     $course = $_POST['course'];
-    addStudent($name,$phone,$course, $dbc);
+    if(empty($name) || empty($phone) || empty($course)){
+        $_SESSION["Error"] = "Some fields are empty";
+        header("Location: ../student");
+    }else{
+
+        addStudent($name,$phone,$course, $pdo);
+
+    }
 }
 
 if(isset($_POST['updateStudent'])){
@@ -62,13 +82,19 @@ if(isset($_POST['updateStudent'])){
     $phone = $_POST['phone'];
     $course = $_POST['course'];
     $id = $_POST['id'];
-    updateStudent($id,$name,$phone,$course,$dbc);
+
+    if(empty($name) || empty($phone) || empty($course)){
+        $_SESSION["Error"] = "Some fields are empty";
+        header("Location: ../student");
+    }else{
+    updateStudent($id,$name,$phone,$course,$pdo);
+    }
 
 }
 
 if(isset($_GET['id'])){
     $del_id = $_GET['id'];
-    deleteStudent( $del_id, $dbc);
+    deleteStudent( $del_id, $pdo);
 }
 
 

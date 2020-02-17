@@ -1,3 +1,5 @@
+<?php require('../files/manage.php'); ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +15,7 @@
   <?php
   session_start();
   if(! $_SESSION['email'] &&  !$_SESSION['name']){
-    header('location: ../../zalego');
+    header('location: ../');
 
   }else{
 
@@ -49,18 +51,38 @@
             <h3 class="text-center">Register Students</h3>
             <hr>
             <form autocomplete="off" action="../files/manage.php" method="POST">
+
+            <?php 
+                        if(isset($_SESSION["Error"]) && $_SESSION["Error"] != null){
+
+                            ?>
+
+                                <div class="mb-2 mt-2">
+                               
+
+                                    <span class="text-sm-center text-danger py-2">
+                                    <?php  
+                                    echo $_SESSION["Error"];
+                                        $_SESSION["Error"] = null;
+                                    ?>
+                                    </span>
+                                </div>
+
+                            <?php
+                        }
+                    ?>
                     <div class="form-group">
                         <label for="Name">Names</label>
-                        <input type="text" class="form-control" id="Name" name="name" required>
+                        <input type="text" class="form-control" id="Name" name="name">
                     </div>
                    
                     <div class="form-group">
                         <label for="phone">Phone</label>
-                        <input type="number" class="form-control" id="phone" name="phone" required>
+                        <input type="number" class="form-control" id="phone" name="phone">
                     </div>
                     <div class="form-group">
                         <label for="course">Course</label>
-                        <input type="course" class="form-control" id="course" name="course" required>
+                        <input type="course" class="form-control" id="course" name="course">
                     </div>
                     <div class="form-group mt-3">                      
                         <button type="submit" class="btn btn-primary btn-smfloat-left" name="addstudent" >Add Student</button>
@@ -70,15 +92,26 @@
                 </form>
           </div>
           <div class="col-md-8">
+           
+
             <?php
             require_once('../files/dbconnection.php');
-            require('../files/manage.php');
-            $students=array();            
-            $students = getStudents($dbc);
-            $countStudents = count($students);
+            
+            $students=array();
+            
+            if(count(getStudents($pdo))> 0){
+              $students = getStudents($pdo)[0];
+              $countStudents = count($students);
+            }else{
+              $countStudents = 0;
+            }
+           
+          
             if($countStudents > 0){  
             
             ?>
+
+            
           <h3 class="text-center">Students' Records</h3>
           <table class="table table-sm table-hover">
             <thead class="thead-dark">
@@ -92,22 +125,25 @@
             </thead>
             <tbody>
             <?php
-					
+              $id = 1;
+              $i=0;
 					foreach($students as $student)
 					{
+
+         
         ?>
          <tr>
-            <td><?php echo $student['id'];?></td>
-		        <td><?php echo $student['name'];?></td>
-		        <td><?php echo $student['phone'];?></td>
-		        <td><?php echo $student['course'];?></td>
-            <td><?php echo $student['date'];?></td>
+            <td><?php echo $id ; $id++;?></td>
+		        <td><?php echo $student->name; ?></td>
+		        <td><?php echo $student->phone?></td>
+		        <td><?php echo $student->course;?></td>
+            <td><?php echo $student ->date;?></td>
             <td>
-              <a href="index.php" class="btn btn-sm btn-success" data-toggle="modal" data-target="#<?php echo $student['id'];?>">Update</a>
-              <a href="?id=<?php echo $student['id'];?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record ??')">Delete</a></td>
+              <a href="index.php" class="btn btn-sm btn-success" data-toggle="modal" data-target="#<?php echo $student->id;?>">Update</a>
+              <a href="?id=<?php echo $student->id;?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record ??')">Delete</a></td>
 
                <!-- update modal -->
-    <div class="modal fade" id="<?php echo $student['id'];?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal fade" id="<?php echo $student->id;?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
 				  <div class="modal-dialog" role="document">
 				    <div class="modal-content">
 				      <div class="modal-header">
@@ -119,20 +155,19 @@
 				      <div class="modal-body">
 							<form action="../files/manage.php" method="POST">
 								<div class="form-group">
-								  <label for="studentid">Id</label>
-								  <input type="text" class="form-control" id="studentid" name="id" readonly value="<?php echo $student['id'];?>">
+								  <input type="hidden" class="form-control" id="studentid" name="id" readonly value="<?php echo $student->id;?>">
                 </div>
                 <div class="form-group">
 								  <label for="name">Names</label>
-								  <input type="text" class="form-control" id="phone" name="name" value="<?php echo $student['name'];?>">
+								  <input type="text" class="form-control" id="phone" name="name" value="<?php echo $student->name;?>">
 								</div>
 								<div class="form-group">
 								  <label for="phonenumber">Phone Number</label>
-								  <input type="text" class="form-control" id="phone" name="phone" value="<?php echo $student['phone'];?>">
+								  <input type="text" class="form-control" id="phone" name="phone" value="<?php echo $student->phone;?>">
 								</div>
 								<div class="form-group">
 								  <label for="course">Course</label>
-								  <input type="text" class="form-control" id="course"  name="course" value="<?php echo $student['course'];?>">
+								  <input type="text" class="form-control" id="course"  name="course" value="<?php echo $student->course; ?>">
 								</div>
 								<button type="update" class="btn btn-default" name="updateStudent">Update</button>
 							</form>
@@ -143,7 +178,7 @@
         </div>
         
         </tr>
-          <?php }?>
+          <?php  }?>
             </tbody>
           </table>
           <?php } ?>

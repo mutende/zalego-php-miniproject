@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.8.0
+-- version 4.9.2
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Aug 27, 2019 at 07:50 AM
--- Server version: 10.3.12-MariaDB-2
--- PHP Version: 7.3.4-2
+-- Generation Time: Feb 17, 2020 at 04:59 PM
+-- Server version: 10.3.20-MariaDB-1
+-- PHP Version: 7.3.12-1
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -52,15 +52,6 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`id`, `fullname`, `email`, `phone`, `password`, `date`) VALUES
-(2, 'Elvis Mutende', 'ian@gmail.com', '0714589956', '$2y$10$JlHieGGrQq7b/qPaUgPw/u1DeXq1f7g1yh6HQtV1ojgglLjBPW3/6', '2019-08-21 13:18:01'),
-(3, 'Janiffer Loppez', 'jlo@gmail.com', '0745987789', '$2y$10$2sPonqQvYRhYbcGBPTSGNOuCPKNgZOt8DhSHFADJm22a0ekgvPI/a', '2019-08-21 15:37:07'),
-(4, 'John Elvis', 'elvismutende@gmail.com', '0717796059', '$2y$10$r21nTlVeu.o5U2/WFyX33.clcbXpfuIMZXUsrF60DopWMilCZl/ia', '2019-08-23 11:56:10');
-
---
 -- Indexes for dumped tables
 --
 
@@ -84,13 +75,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

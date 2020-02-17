@@ -2,7 +2,10 @@
 
 define('DB_HOST', 'localhost');
 define('DB_USER', 'mutende');
-define('DB_PASS', 'm0910');
+define('DB_PASS', 'm2825');
 define('DB_NAME', 'interview');
 
-$dbc = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME) or die('Connection Error => '.mysqli_connect_error());
+$dsn = 'mysql:host='.DB_HOST.';dbname='.DB_NAME;
+$pdo = new PDO($dsn,DB_USER,DB_PASS);
+$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
+

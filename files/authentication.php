@@ -1,99 +1,138 @@
 <?php 
+session_start();
 
 include_once('dbconnection.php');
 
-//search for duplicate data
-        function duplicateUsers($email, $dbc){
-            $search="SELECT * FROM `users` WHERE email= '$email'";
-            $result = $dbc->query($search);
-            $rows=$result->num_rows;
-            if ($rows>0) {
-                return true;
-            }else{
-                return false;
-                }
-            }
-// register users
-            function registerUsers($fullname,$email,$phone,$password,$dbc){
+function duplicateUsers($email, $dbc){
+    $search="SELECT * FROM `users` WHERE `email`= ?";
+    $pre = $dbc->prepare($search);
+    $pre->execute([$email]);
+    $rows=$pre->rowCount();
+    if ($rows>0) {
+        return true;
+    }else{
+        return false;
+        }
+    }
 
-                $hashed_password = password_hash($password,PASSWORD_DEFAULT);
+    function registerUsers($fullname,$email,$phone,$password,$dbc){
 
-                $insert = "INSERT INTO `users` (fullname, email, phone,password, date)
-                VALUES ('$fullname', '$email', '$phone', '$hashed_password', Now())";
+        $hashed_password = password_hash($password,PASSWORD_DEFAULT);
 
-                if(duplicateUsers($email,$dbc) === true){
-              
-                    echo '<script> alert(\'A user with that email already exist.\')</script>';
-                    echo '<script> window.open(\'../signup.php\',\'_self\')</script>';
-                   
-                }else{
-                    if($dbc->query($insert) === true ){
-                        echo '<script> alert(\'Account created successfully, proceed to login.\')</script>';
-                        echo '<script> window.open(\'../login.php\',\'_self\')</script>';
-                    }else{
-                        $serror = 'Error during signup.. try again later';
-                    
-                        $_SESSION['signup_error']= $serror;
-                        echo "Error: " . $insert . "<br>" . $dbc->error;
-                    }
-                }
-            }
+        $insert = "INSERT INTO `users` (fullname, email, phone,password, date)
+        VALUES (?, ?, ?, ?,?)";
 
-// login user
-            function loginUser($email, $password, $dbc){
-                $get_user = "SELECT `email`, `password`, `fullname` FROM users WHERE email = '$email'";
-                $result = $dbc->query($get_user);
-                $rows=$result->num_rows;
-                if ($rows <= 0) {
-                    echo '<script> alert(\'username or password incorrect.\')</script>';
-                    echo '<script> window.open(\'../login.php\',\'_self\')</script>';
-                }else{
+        $pre = $dbc->prepare($insert);
+        
 
-                    while($row = $result->fetch_assoc()){                   
+        if(duplicateUsers($email,$dbc) === true){
 
-                    $verifyPass = password_verify($password, $row['password']);
+            $_SESSION["Error"] = "User with that email already exist";
+            header("Location:../signup.php");        
             
-                    if($verifyPass){
-                        session_start();
-                        $_SESSION['email']= $row['email'];
-                        $_SESSION['name'] = $row['fullname'];   
-                        
-                        header('location: ../student/?login successful');
-                        }else{
-                        echo '<script> alert(\'password is incorrect.\')</script>';
-                        echo '<script> window.open(\'../login.php\',\'_self\')</script>';
+            
+        }else{
+            if($pre->execute([$fullname,$email,$phone,$hashed_password,date('Y-m-d H:i:s')])){                
 
-                        }
-                    }
-                }
+                $_SESSION["success"] = "Account created Successfully. Login!!";
+                header("Location:../login.php");
+
+            }else{
+                $serror = 'Error during signup.. try again later';
+            
+                $_SESSION['Error']= $serror;
+                header("Location:../signup.php");   
             }
-// logout user
-            function logout(){
+        }
+    }
+
+
+    function loginUser($email, $password, $pdo){
+        $get_user = "SELECT `email`, `password`, `fullname` FROM users WHERE email = ? ";
+        $stmt = $pdo->prepare($get_user);
+        $stmt->execute([$email]);
+        $rows=$stmt->rowCount();
+        if ($rows <= 0) {
+            $_SESSION["Error"] = "username or password incorrect.";
+            header("Location:../login.php");
+        }else{
+
+            if($row = $stmt->fetch()){                   
+
+            $verifyPass = password_verify($password, $row->password);
+    
+            if($verifyPass){
                 session_start();
-                if(session_destroy()){
-                    header('location: ../../zalego');
+                $_SESSION['email']= $row->email;
+                $_SESSION['name'] = $row->fullname;                
+                header('location: ../student');
+
+                }else{
+
+                $_SESSION["Error"] = "username or password incorrect.";
+                header("Location:../login.php");
+
                 }
-                
-            }
+            }else{
 
-// call on action
-            if(isset($_POST['signup'])){
-                $fname = $_POST['fname'];
-                $phone = $_POST['phone'];
-                $email = $_POST['email'];
-                $password = $_POST['password'];
-                registerUsers($fname,$email,$phone,$password, $dbc);
-            }
-
-            if(isset($_POST['login'])){
-
-                $email = $_POST['email'];
-                $password = $_POST['password'];
-                loginUser($email, $password, $dbc);
-              
+                $_SESSION["Error"] = "Unable to get password";
+                header("Location:../login.php");
 
             }
+        }
+    }
 
-            if(isset($_GET['logout'])){
-                logout();
-            }
+
+    function logout(){
+        session_start();
+        if(session_destroy()){
+            header('location: ../');
+        }
+        
+    }
+
+
+    if(isset($_POST['signup'])){
+        $fname = $_POST['fname'];
+        $phone = $_POST['phone'];
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+
+      
+        if(empty($fname) || empty($phone) || empty($email) || empty($password)){
+
+            $_SESSION["Error"] = "Some fields are empty";
+            header("Location:../signup.php");
+
+        }else{
+
+            registerUsers($fname,$email,$phone,trim($password), $pdo);
+
+        }
+
+        
+    }
+
+    if(isset($_POST['login'])){
+
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+
+        if(empty($email) || empty($password)){
+
+            $_SESSION["Error"] = "Some fields are empty";
+
+            header("Location:../login.php");
+
+        }else{
+
+            loginUser($email, trim($password), $pdo);
+
+        }
+        
+
+    }
+
+    if(isset($_GET['logout'])){
+        logout();
+    }

@@ -1,3 +1,5 @@
+<?php session_start(); ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,25 +25,45 @@
                 <div class="card-header">
                     <h3>Signup</h3>
                 </div>
-                <div class="card-body">         
+                <div class="card-body">
+
+                <?php 
+                        if(isset($_SESSION["Error"]) && $_SESSION["Error"] != null){
+                            ?>
+
+                                <div class="mb-2 mt-2">
+                               
+
+                                    <span class="text-sm-center text-danger py-2">
+                                    <?php  
+                                    echo $_SESSION["Error"];
+                                        $_SESSION["Error"] = null;
+                                    ?>
+                                    </span>
+                                </div>
+
+                            <?php
+                        }
+                    ?>
+
                 <form autocomplete="off" action="files/authentication.php" method="POST">
                     <div class="form-group">
                         <label for="fname">Full Name</label>
-                        <input type="text" class="form-control" id="fname" name="fname" required>
+                        <input type="text" class="form-control" id="fname" name="fname">
                     </div>
                     
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
-                        <input type="number" class="form-control" id="phone" name="phone" required>
+                        <input type="number" class="form-control" id="phone" name="phone">
                     </div>
                     
                     <div class="form-group">
                         <label for="Email">Email</label>
-                        <input type="email" class="form-control" id="Email" name="email" required>
+                        <input type="email" class="form-control" id="Email" name="email">
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <input type="password" class="form-control" id="password" name="password">
                     </div>
                     <div class="form-group mt-3">                      
                         <button type="submit" class="btn btn-primary btn-smfloat-left" style="width: 200px;" name="signup">Signup</button>
